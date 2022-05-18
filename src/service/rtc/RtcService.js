@@ -43,12 +43,13 @@ export const RtcService = (socket, signaling, peer) => (() => {
     };
 
     const prepareChat = session => {
+
         const onIceCandidate = candidate => {
             signaling.candidate(session.strangerId, candidate);
         };
 
         const onNegotiationNeeded = () => {
-            peer.sendOffer(session.strangerId);
+            if (session.isLastConnected) peer.sendOffer(session.strangerId);
         };
 
         subscriptions.push(
@@ -60,6 +61,7 @@ export const RtcService = (socket, signaling, peer) => (() => {
                     onIceCandidate(candidate);
                 }),
                 peer.messages.subscribe(data => {
+                    console.log("MESSAGE", data.toString())
                     const msg = JSON.parse(data);
                     console.log(`Got message: ${msg}`)
                     messages.next(msg);

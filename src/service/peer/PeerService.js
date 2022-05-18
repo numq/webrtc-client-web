@@ -61,7 +61,7 @@ export const PeerService = signaling => (() => {
     };
 
     const sendOffer = id => {
-        connection.value?.createOffer({iceRestart: connection.value.iceRestart}).then(description => {
+        connection.value?.createOffer().then(description => {
             connection.value.setLocalDescription(description).then(() => {
                 signaling.offer(id, description.sdp);
             }).catch(console.error);
@@ -69,7 +69,7 @@ export const PeerService = signaling => (() => {
     };
 
     const sendAnswer = id => {
-        connection.value?.createAnswer({iceRestart: connection.value.iceRestart}).then(description => {
+        connection.value?.createAnswer().then(description => {
             connection.value.setLocalDescription(description).then(() => {
                 signaling.answer(id, description.sdp);
             }).catch(console.error);

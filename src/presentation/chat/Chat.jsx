@@ -2,15 +2,7 @@ import {useContext, useEffect, useRef, useState} from "react";
 import {ServiceContext} from "../../index";
 import {Box, Card, Divider, IconButton, Input, List, Stack, Typography} from "@mui/material";
 import {LoadingButton} from "../common/LoadingButton";
-import {
-    CallEndRounded,
-    ClearRounded,
-    MicOffRounded,
-    MicRounded,
-    SendRounded,
-    VideocamOffRounded,
-    VideocamRounded
-} from "@mui/icons-material";
+import {CallEndRounded, ClearRounded, SendRounded} from "@mui/icons-material";
 import {Message} from "../../domain/Message";
 import {useSelector} from "react-redux";
 
@@ -39,19 +31,6 @@ export const Chat = () => {
         onResult();
     })(Message(session.clientId, inputText), clearInput);
 
-    const [micEnabled, setMicEnabled] = useState(true);
-    const [camEnabled, setCamEnabled] = useState(true);
-
-    const toggleMic = () => {
-        setMicEnabled(!micEnabled);
-        rtcMedia.toggleAudio(micEnabled);
-    };
-
-    const toggleCam = () => {
-        setCamEnabled(!camEnabled);
-        rtcMedia.toggleAudio(camEnabled);
-    };
-
     const request = () => {
         rtc.requestSession();
         setConnecting(true);
@@ -67,6 +46,14 @@ export const Chat = () => {
     };
 
     useEffect(() => {
+        navigator.mediaDevices.getUserMedia({
+            audio: true, video: {
+                width: {min: 160, ideal: 640, max: 1280},
+                height: {min: 120, ideal: 360, max: 720}
+            }
+        }).then(local => {
+            localRef.current.srcObject = local;
+        }).catch(console.error);
         subscriptions.current.push(
             ...[
                 rtc.messages.subscribe(msg => {
@@ -82,19 +69,6 @@ export const Chat = () => {
             subscriptions.current.length = 0;
         }
     }, [])
-
-    useEffect(() => {
-        if (micEnabled === true || camEnabled === true) {
-            navigator.mediaDevices.getUserMedia({
-                audio: true, video: {
-                    width: {min: 160, ideal: 640, max: 1280},
-                    height: {min: 120, ideal: 360, max: 720}
-                }
-            }).then(local => {
-                localRef.current.srcObject = local;
-            }).catch(console.error);
-        }
-    }, [micEnabled, camEnabled]);
 
     useEffect(() => {
         setConnected(session !== null);
@@ -148,24 +122,31 @@ export const Chat = () => {
             <Stack direction={{sx: "column", sm: "column", md: "column", lg: "row"}}
                    sx={{padding: "8px"}}
                    spacing={2}>
-                {
-                    camEnabled ? <>
-                        <Stack direction={"column"} width={"100%"}
-                               display={{sx: "none", sm: "none", md: "none", lg: "inherit"}}>
-                            <Box alignSelf={"center"}>
-                                <Typography variant={"h6"}>You</Typography>
+                <Stack direction={"column"} width={"100%"}
+                       display={{sx: "none", sm: "none", md: "none", lg: "inherit"}}>
+                    <Box alignSelf={"center"}>
+                        <Typography variant={"h6"}>You</Typography>
+                    </Box>
+                    <video height="500px" ref={localRef} autoPlay muted/>
+                    {
+                        connected ?
+                            <Box display={"flex"} alignSelf={"center"} justifySelf={"center"}>
+                                <Card>
+                                    <IconButton onClick={nextStranger} sx={{color: "red"}}>
+                                        <CallEndRounded/>
+                                    </IconButton>
+                                </Card>
                             </Box>
-                            <video height="500px" ref={localRef} autoPlay/>
-                        </Stack>
-                    </> : <></>
-                }
+                            : null
+                    }
+                </Stack>
                 <Stack direction={"column"} width={"100%"} justifyContent={"center"}>
                     {
                         connected ? <>
                             <Box alignSelf={"center"}>
                                 <Typography variant={"h6"}>Stranger</Typography>
                             </Box>
-                            <video height="500px" ref={remoteRef} autoPlay/>
+                            <video height="500px" ref={remoteRef} autoPlay muted/>
                         </> : <>
                             <Box alignSelf={"center"} margin={"16px"}>
                                 <LoadingButton trigger={connecting} start={request} cancel={cancel}/>
@@ -174,27 +155,6 @@ export const Chat = () => {
                     }
                 </Stack>
             </Stack>
-            <Box display={"flex"} alignSelf={"center"} justifySelf={"center"}>
-                <Card>
-                    <Stack direction={"row"}>
-                        <IconButton onClick={toggleMic}>
-                            {
-                                micEnabled ? <MicRounded/> : <MicOffRounded/>
-                            }
-                        </IconButton>
-                        <IconButton onClick={toggleCam}>
-                            {
-                                camEnabled ? <VideocamRounded/> : <VideocamOffRounded/>
-                            }
-                        </IconButton>
-                        <IconButton onClick={nextStranger} sx={{color: "red"}}>
-                            {
-                                connected ? <CallEndRounded/> : null
-                            }
-                        </IconButton>
-                    </Stack>
-                </Card>
-            </Box>
             {
                 connected ? <>
                     <Stack direction="column"
