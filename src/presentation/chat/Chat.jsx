@@ -1,6 +1,6 @@
 import {useContext, useEffect, useRef, useState} from "react";
 import {ServiceContext} from "../../index";
-import {Box, Card, Divider, IconButton, Input, List, Paper, Stack, Typography} from "@mui/material";
+import {Box, Card, Divider, IconButton, Input, List, Stack, Typography} from "@mui/material";
 import {LoadingButton} from "../common/LoadingButton";
 import {
     CallEndRounded,
@@ -67,14 +67,6 @@ export const Chat = () => {
     };
 
     useEffect(() => {
-        navigator.mediaDevices.getUserMedia({
-            audio: true, video: {
-                width: {min: 160, ideal: 640, max: 1280},
-                height: {min: 120, ideal: 360, max: 720}
-            }
-        }).then(local => {
-            localRef.current.srcObject = local;
-        }).catch(console.error);
         subscriptions.current.push(
             ...[
                 rtc.messages.subscribe(msg => {
@@ -89,7 +81,19 @@ export const Chat = () => {
             subscriptions.current.forEach(s => s.unsubscribe());
             subscriptions.current.length = 0;
         }
-    }, []);
+    })
+
+    useEffect(() => {
+        navigator.mediaDevices.getUserMedia({
+            audio: true, video: {
+                width: {min: 160, ideal: 640, max: 1280},
+                height: {min: 120, ideal: 360, max: 720}
+            }
+        }).then(local => {
+            localRef.current.srcObject = local;
+        }).catch(console.error);
+
+    }, [micEnabled, camEnabled]);
 
     useEffect(() => {
         setConnected(session !== null);
@@ -101,7 +105,6 @@ export const Chat = () => {
             rtc.joinSession(session);
             rtc.prepareChat(session);
             localStream?.getTracks().forEach(track => rtcMedia.addTrack(track, localStream));
-            setMessages(prev => ([...prev, ...Array(10).fill(Message(session?.senderId, "test"))]));
         } else {
             rtc.disposeChat();
             rtc.leaveSession();
@@ -141,57 +144,56 @@ export const Chat = () => {
 
     return (
         <Stack direction={"column"} height="95vh" justifyContent={"space-between"}>
-            <Paper component={Stack} direction="column" sx={{padding: "8px", height: "100%"}}>
-                <Stack direction={{sx: "column", sm: "column", md: "column", lg: "row"}}
-                       spacing={2}>
-                    {
-                        camEnabled ? <>
-                            <Stack direction={"column"} width={"100%"}
-                                   display={{sx: "none", sm: "none", md: "none", lg: "inherit"}}>
-                                <Box alignSelf={"center"}>
-                                    <Typography variant={"h6"}>You</Typography>
-                                </Box>
-                                <video ref={localRef} controls autoPlay muted/>
-                            </Stack>
-                        </> : null
-                    }
-                    <Stack direction={"column"} width={"100%"} justifyContent={"center"}>
-                        {
-                            connected ? <>
-                                <Box alignSelf={"center"}>
-                                    <Typography variant={"h6"}>Stranger</Typography>
-                                </Box>
-                                <video ref={remoteRef} controls autoPlay muted/>
-                            </> : <>
-                                <Box alignSelf={"center"} margin={"16px"}>
-                                    <LoadingButton trigger={connecting} start={request} cancel={cancel}/>
-                                </Box>
-                            </>
-                        }
-                    </Stack>
-                </Stack>
-                <Box display={"flex"} alignSelf={"center"} justifySelf={"center"} marginTop={"8px"}>
-                    <Card>
-                        <Stack direction={"row"}>
-                            <IconButton onClick={toggleMic}>
-                                {
-                                    micEnabled ? <MicRounded/> : <MicOffRounded/>
-                                }
-                            </IconButton>
-                            <IconButton onClick={toggleCam}>
-                                {
-                                    camEnabled ? <VideocamRounded/> : <VideocamOffRounded/>
-                                }
-                            </IconButton>
-                            <IconButton onClick={nextStranger} sx={{color: "red"}}>
-                                {
-                                    connected ? <CallEndRounded/> : null
-                                }
-                            </IconButton>
+            <Stack direction={{sx: "column", sm: "column", md: "column", lg: "row"}}
+                   sx={{padding: "8px"}}
+                   spacing={2}>
+                {
+                    camEnabled ? <>
+                        <Stack direction={"column"} width={"100%"}
+                               display={{sx: "none", sm: "none", md: "none", lg: "inherit"}}>
+                            <Box alignSelf={"center"}>
+                                <Typography variant={"h6"}>You</Typography>
+                            </Box>
+                            <video height="500px" ref={localRef} autoPlay/>
                         </Stack>
-                    </Card>
-                </Box>
-            </Paper>
+                    </> : null
+                }
+                <Stack direction={"column"} width={"100%"} justifyContent={"center"}>
+                    {
+                        connected ? <>
+                            <Box alignSelf={"center"}>
+                                <Typography variant={"h6"}>Stranger</Typography>
+                            </Box>
+                            <video height="500px" ref={remoteRef} autoPlay/>
+                        </> : <>
+                            <Box alignSelf={"center"} margin={"16px"}>
+                                <LoadingButton trigger={connecting} start={request} cancel={cancel}/>
+                            </Box>
+                        </>
+                    }
+                </Stack>
+            </Stack>
+            <Box display={"flex"} alignSelf={"center"} justifySelf={"center"}>
+                <Card>
+                    <Stack direction={"row"}>
+                        <IconButton onClick={toggleMic}>
+                            {
+                                micEnabled ? <MicRounded/> : <MicOffRounded/>
+                            }
+                        </IconButton>
+                        <IconButton onClick={toggleCam}>
+                            {
+                                camEnabled ? <VideocamRounded/> : <VideocamOffRounded/>
+                            }
+                        </IconButton>
+                        <IconButton onClick={nextStranger} sx={{color: "red"}}>
+                            {
+                                connected ? <CallEndRounded/> : null
+                            }
+                        </IconButton>
+                    </Stack>
+                </Card>
+            </Box>
             {
                 connected ? <>
                     <Stack direction="column"
