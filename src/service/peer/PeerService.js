@@ -100,7 +100,7 @@ export const PeerService = signaling => (() => {
 
     return {
         negotiationNeeded: negotiationNeeded,
-        tracks: stream,
+        stream: stream,
         iceCandidates: iceCandidates,
         messages: messages,
         create: create,
