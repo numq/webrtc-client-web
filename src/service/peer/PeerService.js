@@ -5,9 +5,6 @@ export const PeerService = signaling => (() => {
     const createConnection = () => new RTCPeerConnection({
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
-        sdpSemantics: "unified-plan",
-        bundlePolicy: "max-compat",
-        rtcpMuxPolicy: "negotiate",
         iceServers: [{urls: ["stun:stun.stunprotocol.org:3478", "stun:stun.l.google.com:19302"]}]
     });
 
@@ -41,9 +38,7 @@ export const PeerService = signaling => (() => {
         })
         connection.next(peer);
 
-        const newChannel = peer.createDataChannel(DEFAULT_CHANNEL, {
-            reliable: false
-        });
+        const newChannel = peer.createDataChannel(DEFAULT_CHANNEL);
         newChannel.addEventListener("message", ({data}) => {
             messages.next(data);
         });
@@ -61,21 +56,21 @@ export const PeerService = signaling => (() => {
 
     const sendMessage = data => {
         if (dataChannel.value?.readyState === 'open') {
-            dataChannel.value?.send(JSON.stringify(data))
+            dataChannel.value.send(JSON.stringify(data))
         }
     };
 
     const sendOffer = id => {
-        connection.value?.createOffer().then(description => {
-            connection.value?.setLocalDescription(description).then(() => {
+        connection.value?.createOffer({iceRestart: connection.value.iceRestart}).then(description => {
+            connection.value.setLocalDescription(description).then(() => {
                 signaling.offer(id, description.sdp);
             }).catch(console.error);
         });
     };
 
     const sendAnswer = id => {
-        connection.value?.createAnswer().then(description => {
-            connection.value?.setLocalDescription(description).then(() => {
+        connection.value?.createAnswer({iceRestart: connection.value.iceRestart}).then(description => {
+            connection.value.setLocalDescription(description).then(() => {
                 signaling.answer(id, description.sdp);
             }).catch(console.error);
         });
@@ -98,7 +93,7 @@ export const PeerService = signaling => (() => {
     const onAnswerReceived = description => {
         const sdp = new RTCSessionDescription({type: "answer", sdp: description});
         connection.value?.setRemoteDescription(sdp).then(() => {
-            console.log("Peer connection state: %s", connection.value?.connectionState);
+            console.log("Peer connection state: %s", connection.value.connectionState);
         }).catch(console.error);
     };
 
