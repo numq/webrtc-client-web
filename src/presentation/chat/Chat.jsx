@@ -19,8 +19,8 @@ export const Chat = () => {
     const {rtc, rtcMedia} = useContext(ServiceContext);
 
     const localRef = useRef(null);
+    const localStream = localRef.current?.srcObject;
     const remoteRef = useRef(null);
-    const localStream = localRef.current?.srcObject
     const listEndRef = useRef(null)
 
     const [connecting, setConnecting] = useState(false);
@@ -67,6 +67,14 @@ export const Chat = () => {
     };
 
     useEffect(() => {
+        // navigator.mediaDevices.getUserMedia({
+        //     audio: true, video: {
+        //         width: {min: 160, ideal: 640, max: 1280},
+        //         height: {min: 120, ideal: 360, max: 720}
+        //     }
+        // }).then(local => {
+        //     localRef.current.srcObject = local;
+        // }).catch(console.error);
         subscriptions.current.push(
             ...[
                 rtc.messages.subscribe(msg => {
@@ -81,18 +89,21 @@ export const Chat = () => {
             subscriptions.current.forEach(s => s.unsubscribe());
             subscriptions.current.length = 0;
         }
-    })
+    }, [])
 
     useEffect(() => {
-        navigator.mediaDevices.getUserMedia({
-            audio: true, video: {
-                width: {min: 160, ideal: 640, max: 1280},
-                height: {min: 120, ideal: 360, max: 720}
-            }
-        }).then(local => {
-            localRef.current.srcObject = local;
-        }).catch(console.error);
-
+        if (micEnabled === true || camEnabled === true) {
+            navigator.mediaDevices.getUserMedia({
+                audio: true, video: {
+                    width: {min: 160, ideal: 640, max: 1280},
+                    height: {min: 120, ideal: 360, max: 720}
+                }
+            }).then(local => {
+                localRef.current.srcObject = local;
+            }).catch(console.error);
+        } else{
+            return
+        }
     }, [micEnabled, camEnabled]);
 
     useEffect(() => {
@@ -156,7 +167,7 @@ export const Chat = () => {
                             </Box>
                             <video height="500px" ref={localRef} autoPlay/>
                         </Stack>
-                    </> : null
+                    </> : <></>
                 }
                 <Stack direction={"column"} width={"100%"} justifyContent={"center"}>
                     {
@@ -214,7 +225,7 @@ export const Chat = () => {
                                 <SendRounded/>}</IconButton>
                         </Stack>
                     </Stack>
-                </> : null
+                </> : <></>
             }
         </Stack>
     );
