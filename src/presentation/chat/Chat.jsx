@@ -67,14 +67,6 @@ export const Chat = () => {
     };
 
     useEffect(() => {
-        // navigator.mediaDevices.getUserMedia({
-        //     audio: true, video: {
-        //         width: {min: 160, ideal: 640, max: 1280},
-        //         height: {min: 120, ideal: 360, max: 720}
-        //     }
-        // }).then(local => {
-        //     localRef.current.srcObject = local;
-        // }).catch(console.error);
         subscriptions.current.push(
             ...[
                 rtc.messages.subscribe(msg => {
@@ -101,8 +93,6 @@ export const Chat = () => {
             }).then(local => {
                 localRef.current.srcObject = local;
             }).catch(console.error);
-        } else{
-            return
         }
     }, [micEnabled, camEnabled]);
 
