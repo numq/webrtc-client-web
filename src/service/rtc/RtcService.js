@@ -49,7 +49,8 @@ export const RtcService = (socket, signaling, peer) => (() => {
         };
 
         const onNegotiationNeeded = () => {
-            if (session.isLastConnected) peer.sendOffer(session.strangerId);
+            // if (session.isLastConnected) peer.sendOffer(session.strangerId);
+            peer.sendOffer(session.strangerId);
         };
 
         subscriptions.push(

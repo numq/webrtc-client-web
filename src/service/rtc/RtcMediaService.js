@@ -1,6 +1,6 @@
 export const RtcMediaService = peer => (() => {
 
-    const stream = peer.tracks;
+    const stream = peer.stream;
 
     const addTrack = peer.addTrack;
 

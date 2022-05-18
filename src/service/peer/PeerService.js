@@ -14,7 +14,7 @@ export const PeerService = signaling => (() => {
     const dataChannel = new BehaviorSubject(null);
 
     const negotiationNeeded = new Subject();
-    const tracks = new Subject();
+    const stream = new Subject();
     const iceCandidates = new Subject();
     const messages = new Subject();
 
@@ -23,7 +23,8 @@ export const PeerService = signaling => (() => {
         const peer = createConnection();
 
         peer.addEventListener("track", ({streams}) => {
-            tracks.next(streams[0]);
+            console.log("TRACK", streams[0])
+            stream.next(streams[0]);
         })
         peer.addEventListener("icecandidate", ({candidate}) => {
             if (candidate) {
@@ -99,7 +100,7 @@ export const PeerService = signaling => (() => {
 
     return {
         negotiationNeeded: negotiationNeeded,
-        tracks: tracks,
+        tracks: stream,
         iceCandidates: iceCandidates,
         messages: messages,
         create: create,
