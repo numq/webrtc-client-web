@@ -87,7 +87,7 @@ export const PeerService = signaling => (() => {
             sdpMLineIndex: sdpMLineIndex,
             sdp: sdp
         });
-        connection.value?.addIceCandidate(iceCandidate).then(console.log).catch(console.error);
+        return connection.value?.addIceCandidate(iceCandidate);
     };
 
     const onOfferReceived = (id, description) => {

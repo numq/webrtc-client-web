@@ -10,6 +10,7 @@ export const RtcService = (socket, signaling, peer) => (() => {
 
     const initialize = () => {
         subscriptions.push(socket.messages.subscribe(({type, body}) => {
+            console.log(`Got message with type: ${type}`);
             switch (type) {
                 case MessageType.CONNECTED: {
                     const newSession = Session(body.sessionId, body.clientId, body.strangerId, body.isLastConnected);
@@ -58,7 +59,6 @@ export const RtcService = (socket, signaling, peer) => (() => {
                     onNegotiationNeeded();
                 }),
                 peer.iceCandidates.subscribe(candidate => {
-                    console.log(candidate)
                     onIceCandidate(candidate);
                 }),
                 peer.messages.subscribe(data => {

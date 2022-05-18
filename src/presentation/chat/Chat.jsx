@@ -26,10 +26,7 @@ export const Chat = () => {
     const [connecting, setConnecting] = useState(false);
     const [connected, setConnected] = useState(false);
 
-    const session = useSelector(state => {
-        console.log(state);
-        return state.app.session;
-    });
+    const session = useSelector(state => state.app.session);
 
     const [inputText, setInputText] = useState("");
     const clearInput = () => setInputText("");
