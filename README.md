@@ -1,6 +1,5 @@
 # Video chat Web client
 
-## Description:
 **Implementation of an Omegle-like video chat Web client using WebRTC standard and Clean Architecture principles.**
 
 ## Tech:
