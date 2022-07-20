@@ -1,6 +1,5 @@
 # Video chat Web client
-
-**Implementation of an Omegle-like video chat Web client using WebRTC standard and Clean Architecture principles.**
+WebRTC random video chat application client implementation using Clean Architecture and functional reactive programming principles.
 
 ## Tech:
 - JavaScript
